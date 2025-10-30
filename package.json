@@ -4,7 +4,7 @@
   "description": "進銷存暨營運決策分析系統 - ERP System with Web Interface",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "prisma generate",
