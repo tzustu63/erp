@@ -13,13 +13,14 @@
 
 ### ⚠️ 重要提醒
 
-**部署順序很重要！**
+**部署順序建議：**
 
 1. ✅ 先添加 PostgreSQL 資料庫服務
 2. ✅ 複製 `DATABASE_URL` 到應用程式變數
 3. ✅ 然後再部署或重新部署應用程式
 
-**如果直接部署沒有先設定資料庫，會出現 `DATABASE_URL` 錯誤！**
+**如果沒有資料庫，也不用擔心！**  
+系統已實作安全啟動腳本，即使沒有 `DATABASE_URL` 也會正常啟動，並自動使用模擬資料模式。
 
 ---
 
@@ -66,10 +67,14 @@ https://railway.app
   1. 偵測 Next.js 專案
   2. 執行 `npm install`
   3. 執行 `npm run build`
-  4. 執行 `npm run db:generate`（產生 Prisma Client）
-  5. 執行 `npm run db:push`（初始化資料庫）
-  6. 執行 `npm start`
+  4. 執行 `node scripts/safe-start.js`（安全啟動腳本）
+     - 自動檢查 `DATABASE_URL` 是否存在
+     - 如果存在，初始化資料庫
+     - 如果不存在，使用模擬資料模式
+  5. 啟動應用程式
 - 部署時間約 3-5 分鐘
+
+**重要**：即使沒有 `DATABASE_URL`，應用程式也會正常啟動並使用模擬資料。
 
 #### 步驟 6: 取得網址
 
@@ -228,6 +233,7 @@ Railway 會自動設定的變數：
 ### DATABASE_URL 錯誤
 
 如果看到錯誤訊息：
+
 ```
 Error: Environment variable not found: DATABASE_URL
 ```
