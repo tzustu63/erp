@@ -52,19 +52,14 @@ https://railway.app
 3. 點擊 "Generate Domain"
 4. 複製網址並訪問
 
-#### 步驟 7: 初始化資料庫
-1. 點擊應用程式服務 → "Settings" → "Open Terminal"
-2. 執行以下任一指令：
+#### 步驟 7: 驗證資料庫初始化
 
-**選項 A: 使用 SQL**
-```bash
-psql $DATABASE_URL -f database/schema.sql
-```
+✅ **資料庫會自動初始化！**  
+系統會在部署時自動執行 `prisma db push`，建立所有必要的資料表。
 
-**選項 B: 使用 Prisma**
-```bash
-npm run db:push
-```
+如果自動初始化失敗，應用程式會自動切換到**模擬資料模式**，確保系統正常運作。
+
+> **注意**: 為了讓應用程式在沒有資料庫的情況下也能正常運行，系統已內建模擬資料功能。
 
 ---
 
