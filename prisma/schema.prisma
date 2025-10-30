@@ -1,0 +1,251 @@
+// 進銷存暨營運決策分析系統 - Prisma Schema
+// 此 Schema 基於 database/schema.sql 定義
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// 主資料層
+// ============================================
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique @db.VarChar(50)
+  name        String   @db.VarChar(255)
+  category    String?  @db.VarChar(100)
+  unit        String?  @db.VarChar(20)
+  costPrice   Decimal  @map("cost_price") @db.Decimal(10, 2)
+  salesPrice  Decimal  @map("sales_price") @db.Decimal(10, 2)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  purchaseDetails PurchaseDetail[]
+  salesDetails    SalesDetail[]
+  inventory       Inventory?
+  priceHistories  PriceHistory[]
+  priceComparisons PriceComparison[]
+  
+  @@index([code])
+  @@map("products")
+}
+
+model Supplier {
+  id            Int      @id @default(autoincrement())
+  code          String   @unique @db.VarChar(50)
+  name          String   @db.VarChar(255)
+  taxId         String?  @map("tax_id") @db.VarChar(50)
+  contact       String?  @db.VarChar(255)
+  paymentTerms  String?  @map("payment_terms") @db.VarChar(100)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  purchaseMasters PurchaseMaster[]
+  priceHistories  PriceHistory[]
+  priceComparisons PriceComparison[]
+  
+  @@index([code])
+  @@map("suppliers")
+}
+
+model Customer {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique @db.VarChar(50)
+  name        String   @db.VarChar(255)
+  taxId       String?  @map("tax_id") @db.VarChar(50)
+  contact     String?  @db.VarChar(255)
+  creditLimit Decimal  @map("credit_limit") @db.Decimal(12, 2)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  salesMasters SalesMaster[]
+  
+  @@index([code])
+  @@map("customers")
+}
+
+// ============================================
+// 進貨模組
+// ============================================
+
+model PurchaseMaster {
+  id          Int      @id @default(autoincrement())
+  purchaseNo  String   @unique @map("purchase_no") @db.VarChar(50)
+  supplierId  Int      @map("supplier_id")
+  purchaseDate DateTime @map("purchase_date") @db.Date
+  amount      Decimal  @db.Decimal(12, 2)
+  tax         Decimal  @db.Decimal(12, 2)
+  status      String   @default("待入庫")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  supplier Supplier        @relation(fields: [supplierId], references: [id])
+  details  PurchaseDetail[]
+  
+  @@index([supplierId])
+  @@index([purchaseDate])
+  @@map("purchase_masters")
+}
+
+model PurchaseDetail {
+  id         Int      @id @default(autoincrement())
+  purchaseId Int      @map("purchase_id")
+  productId  Int      @map("product_id")
+  quantity   Int
+  unitPrice  Decimal  @map("unit_price") @db.Decimal(10, 2)
+  subTotal   Decimal  @map("sub_total") @db.Decimal(12, 2)
+  createdAt  DateTime @default(now()) @map("created_at")
+  
+  purchaseMaster PurchaseMaster @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  product        Product        @relation(fields: [productId], references: [id])
+  
+  @@index([productId])
+  @@map("purchase_details")
+}
+
+// ============================================
+// 銷貨模組
+// ============================================
+
+model SalesMaster {
+  id          Int      @id @default(autoincrement())
+  salesNo     String   @unique @map("sales_no") @db.VarChar(50)
+  customerId  Int      @map("customer_id")
+  salesDate   DateTime @map("sales_date") @db.Date
+  amount      Decimal  @db.Decimal(12, 2)
+  tax         Decimal  @db.Decimal(12, 2)
+  invoiceNo   String   @unique @map("invoice_no") @db.VarChar(50)
+  invoiceDate DateTime @map("invoice_date") @db.Date
+  status      String   @default("待出貨")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  customer Customer   @relation(fields: [customerId], references: [id])
+  details  SalesDetail[]
+  payments Payment[]
+  
+  @@index([customerId])
+  @@index([salesDate])
+  @@map("sales_masters")
+}
+
+model SalesDetail {
+  id        Int      @id @default(autoincrement())
+  salesId   Int      @map("sales_id")
+  productId Int      @map("product_id")
+  quantity  Int
+  unitPrice Decimal  @map("unit_price") @db.Decimal(10, 2)
+  subTotal  Decimal  @map("sub_total") @db.Decimal(12, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  salesMaster SalesMaster @relation(fields: [salesId], references: [id], onDelete: Cascade)
+  product     Product     @relation(fields: [productId], references: [id])
+  
+  @@index([productId])
+  @@map("sales_details")
+}
+
+// ============================================
+// 財務模組
+// ============================================
+
+model Payment {
+  id            Int      @id @default(autoincrement())
+  salesId       Int      @map("sales_id")
+  paymentNo     String   @unique @map("payment_no") @db.VarChar(50)
+  paymentDate   DateTime @map("payment_date") @db.Date
+  paymentMethod String   @map("payment_method") @db.VarChar(20)
+  amount        Decimal  @db.Decimal(12, 2)
+  createdAt     DateTime @default(now()) @map("created_at")
+  
+  salesMaster SalesMaster @relation(fields: [salesId], references: [id])
+  
+  @@index([salesId])
+  @@index([paymentDate])
+  @@map("payments")
+}
+
+// ============================================
+// 庫存模組
+// ============================================
+
+model Inventory {
+  id           Int      @id @default(autoincrement())
+  productId    Int      @unique @map("product_id")
+  beginningQty Int      @default(0) @map("beginning_qty")
+  purchaseQty  Int      @default(0) @map("purchase_qty")
+  salesQty     Int      @default(0) @map("sales_qty")
+  currentQty   Int      @default(0) @map("current_qty")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  product Product @relation(fields: [productId], references: [id])
+  
+  @@index([currentQty])
+  @@map("inventory")
+}
+
+// ============================================
+// 分析模組
+// ============================================
+
+model PriceHistory {
+  id           Int      @id @default(autoincrement())
+  supplierId   Int      @map("supplier_id")
+  productId    Int      @map("product_id")
+  purchaseDate DateTime @map("purchase_date") @db.Date
+  unitPrice    Decimal  @map("unit_price") @db.Decimal(10, 2)
+  createdAt    DateTime @default(now()) @map("created_at")
+  
+  supplier Supplier @relation(fields: [supplierId], references: [id])
+  product  Product  @relation(fields: [productId], references: [id])
+  
+  @@index([productId])
+  @@index([purchaseDate])
+  @@map("price_history")
+}
+
+model PriceComparison {
+  productId  Int
+  supplierId Int      @map("supplier_id")
+  unitPrice  Decimal  @map("unit_price") @db.Decimal(10, 2)
+  date       DateTime @db.Date
+  
+  product  Product  @relation(fields: [productId], references: [id])
+  supplier Supplier @relation(fields: [supplierId], references: [id])
+  
+  @@id([productId, supplierId, date])
+  @@map("price_comparisons")
+}
+
+model DepartmentExpense {
+  id          Int      @id @default(autoincrement())
+  year        Int
+  month       Int
+  department  String   @db.VarChar(100)
+  category    String   @db.VarChar(100)
+  tax         Decimal  @db.Decimal(12, 2)
+  totalAmount Decimal  @map("total_amount") @db.Decimal(12, 2)
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  @@index([year, month])
+  @@map("department_expenses")
+}
+
+model DashboardData {
+  id             Int      @id @default(autoincrement())
+  year           Int
+  month          Int
+  indicatorType  String   @map("indicator_type") @db.VarChar(50)
+  amount         Decimal  @db.Decimal(12, 2)
+  createdAt      DateTime @default(now()) @map("created_at")
+  
+  @@index([year, month])
+  @@map("dashboard_data")
+}
+

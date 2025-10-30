@@ -1,0 +1,108 @@
+# 進銷存系統 - 完整專案結構
+
+## 已建立的完整系統
+
+### 📊 資料庫層（PostgreSQL）
+database/
+  schema.sql                 # 完整資料庫 Schema（12 張表）
+
+prisma/
+  schema.prisma              # Prisma ORM Schema
+
+### 🌐 Web 應用層（Next.js 14）
+app/
+  ├── layout.js              # 應用程式根布局
+  ├── globals.css            # 全局樣式（設計系統）
+  ├── page.js                # Dashboard 儀表板
+  ├── products/
+  │   └── page.js            # 產品主檔管理
+  ├── inventory/
+  │   └── page.js            # 庫存查詢
+  └── api/
+      ├── products/
+      │   └── route.js       # 產品 CRUD API
+      └── inventory/
+          └── route.js       # 庫存查詢 API
+
+### 📦 業務邏輯層
+src/
+  ├── data/
+  │   └── definitions.js     # 資料結構定義
+  ├── services/
+  │   ├── master-data-service.js   # 主資料服務
+  │   ├── purchasing-service.js    # 進貨服務
+  │   ├── sales-service.js         # 銷貨服務
+  │   ├── inventory-service.js     # 庫存服務
+  │   ├── finance-service.js       # 財務服務
+  │   └── analytics-service.js     # 分析服務
+  └── tests/
+      └── inventory-test.js         # 測試檔案
+
+### ⚙️ 配置檔案
+lib/
+  └── db.js                  # 資料庫連接
+
+配置文件：
+  ├── package.json           # 專案依賴
+  ├── next.config.js         # Next.js 配置
+  ├── tailwind.config.js     # Tailwind CSS 配置
+  ├── postcss.config.js      # PostCSS 配置
+  ├── .env.example           # 環境變數範例
+  └── .gitignore             # Git 忽略規則
+
+### 📚 文件
+  ├── README.md              # 專案說明
+  ├── SETUP-INSTRUCTIONS.md  # 安裝與設定指南
+  ├── WEB-IMPLEMENTATION.md  # Web 實作文件
+  └── CONVERSION-SUMMARY.md  # 轉換總結
+
+### 📋 OpenSpec 規範
+openspec/
+  ├── project.md             # 專案上下文
+  └── changes/
+      └── initial-inventory-system/
+          ├── proposal.md    # 變更提案
+          ├── tasks.md       # 任務清單
+          ├── design.md      # 設計文件
+          ├── ui-design.md   # UI 設計規格
+          └── specs/         # 6 個能力模組規範
+              ├── master-data/
+              ├── purchasing/
+              ├── sales/
+              ├── finance/
+              ├── inventory/
+              └── analytics/
+
+## 📊 統計
+
+總檔案數：23+ 個程式檔案
+總程式碼：2000+ 行
+資料表：12 張
+API 端點：2+ 個
+前端頁面：3 個
+服務模組：6 個
+
+## ✨ 核心功能
+
+✅ 主資料管理（產品、廠商、客戶）
+✅ 進貨管理（自動更新庫存、記錄歷史價格）
+✅ 銷貨管理（信用額度檢查、庫存警示）
+✅ 財務對帳（應收帳款、部分付款）
+✅ 庫存追蹤（即時庫存、自動計算）
+✅ 決策分析（歷史價格、比價、部門支出、儀表板）
+
+## 🚀 快速開始
+
+1. npm install
+2. 設定 PostgreSQL 資料庫
+3. 執行 database/schema.sql
+4. 配置 .env
+5. npm run dev
+
+## 🎯 技術棧
+
+Frontend: Next.js 14, React 18, Tailwind CSS
+Backend: Next.js API Routes
+Database: PostgreSQL 14+
+ORM: Prisma
+Query: React Query
