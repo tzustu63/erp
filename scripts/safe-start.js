@@ -31,7 +31,8 @@ if (process.env.DATABASE_URL) {
 // 啟動應用程式
 console.log('🚀 啟動應用程式...');
 try {
-  execSync('npm start', { stdio: 'inherit' });
+  const port = process.env.PORT || '3000';
+  execSync(`next start -p ${port}`, { stdio: 'inherit' });
 } catch (error) {
   console.error('❌ 應用程式啟動失敗:', error.message);
   process.exit(1);
