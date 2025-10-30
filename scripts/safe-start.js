@@ -31,8 +31,8 @@ if (process.env.DATABASE_URL) {
 // 啟動應用程式
 console.log('🚀 啟動應用程式...');
 try {
-  const port = process.env.PORT || '3000';
-  execSync(`next start -p ${port}`, { stdio: 'inherit' });
+  // 讓 Next.js 自動處理 PORT（Railway 會自動設定 PORT 環境變數）
+  execSync('next start', { stdio: 'inherit' });
 } catch (error) {
   console.error('❌ 應用程式啟動失敗:', error.message);
   process.exit(1);
